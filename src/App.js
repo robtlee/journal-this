@@ -7,6 +7,9 @@ export default function HealingJournal() {
   const [response, setResponse] = useState("");
   const [mode, setMode] = useState("self-compassion");
   const [mood, setMood] = useState("neutral");
+  const [authenticated, setAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const promptsByMode = {
     "self-compassion": [
@@ -34,14 +37,33 @@ export default function HealingJournal() {
   const handleSubmit = () => {
     let aiReflection = "";
     if (mode === "cbt") {
-      aiReflection = \`You challenged your thought with evidence and opened space for a more balanced view. That’s powerful.\`;
+      aiReflection = `You challenged your thought with evidence and opened space for a more balanced view. That’s powerful. Try repeating the balanced thought throughout your day.`;
     } else if (mode === "act") {
-      aiReflection = \`You connected with your values and took a step aligned with who you want to be. Keep going.\`;
+      aiReflection = `You’ve connected with your values. Even amidst difficult feelings, choosing small actions that align with who you want to be is courageous.`;
     } else {
-      aiReflection = \`You showed up with honesty and care. What would 10% more self-kindness look like right now?\`;
+      aiReflection = `Thank you for your reflection. You’re showing up with honesty and care, and that matters. What would it feel like to offer yourself just 10% more kindness today?`;
     }
-    setResponse(\`Mood: \${mood}\n\n\${aiReflection}\`);
+    setResponse(`Mood: ${mood}\n\n${aiReflection}`);
   };
+
+  const handleLogin = () => {
+    if (username === "robtlee" && password === "!Denver0710!") {
+      setAuthenticated(true);
+    } else {
+      alert("Incorrect username or password");
+    }
+  };
+
+  if (!authenticated) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} style={{ maxWidth: '400px', margin: '2rem auto', padding: '1.5rem', background: '#fff', borderRadius: '0.75rem', boxShadow: '0 0 20px rgba(0,0,0,0.1)' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', textAlign: 'center' }}>🔐 Log In to Healing Journal</h1>
+        <input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem' }} />
+        <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }} />
+        <button onClick={handleLogin} style={{ width: '100%', padding: '0.5rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '0.375rem' }}>Log In</button>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} style={{ maxWidth: '600px', margin: '2rem auto', padding: '1.5rem', background: '#f0f4f8', borderRadius: '0.75rem' }}>
