@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export default function HealingJournal() {
@@ -7,9 +6,14 @@ export default function HealingJournal() {
   const [response, setResponse] = useState("");
   const [mode, setMode] = useState("self-compassion");
   const [mood, setMood] = useState("neutral");
+  const [entries, setEntries] = useState(() => JSON.parse(localStorage.getItem("journalEntries")) || []);
   const [authenticated, setAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("journalEntries", JSON.stringify(entries));
+  }, [entries]);
 
   const promptsByMode = {
     "self-compassion": [
@@ -37,13 +41,22 @@ export default function HealingJournal() {
   const handleSubmit = () => {
     let aiReflection = "";
     if (mode === "cbt") {
-      aiReflection = `You challenged your thought with evidence and opened space for a more balanced view. That’s powerful. Try repeating the balanced thought throughout your day.`;
+      aiReflection = `You challenged your thought with evidence and opened space for a more balanced view. That’s powerful.`;
     } else if (mode === "act") {
       aiReflection = `You’ve connected with your values. Even amidst difficult feelings, choosing small actions that align with who you want to be is courageous.`;
     } else {
-      aiReflection = `Thank you for your reflection. You’re showing up with honesty and care, and that matters. What would it feel like to offer yourself just 10% more kindness today?`;
+      aiReflection = `Thank you for your reflection. You’re showing up with honesty and care, and that matters.`;
     }
+    const newEntry = {
+      date: new Date().toLocaleString(),
+      mode,
+      mood,
+      content: entry,
+      reflection: aiReflection
+    };
+    setEntries([newEntry, ...entries]);
     setResponse(`Mood: ${mood}\n\n${aiReflection}`);
+    setEntry("");
   };
 
   const handleLogin = () => {
@@ -52,6 +65,16 @@ export default function HealingJournal() {
     } else {
       alert("Incorrect username or password");
     }
+  };
+
+  const exportEntries = () => {
+    const blob = new Blob([JSON.stringify(entries, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "healing_journal_entries.json";
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   if (!authenticated) {
@@ -111,6 +134,19 @@ export default function HealingJournal() {
           </div>
         </motion.div>
       )}
+
+      <div style={{ marginTop: '2rem' }}>
+        <h3>🗂 Past Entries</h3>
+        {entries.map((e, i) => (
+          <div key={i} style={{ marginBottom: '1rem', padding: '1rem', background: '#fff', borderRadius: '0.5rem', boxShadow: '0 0 6px rgba(0,0,0,0.05)' }}>
+            <strong>{e.date}</strong> — <em>{e.mode} / {e.mood}</em>
+            <p style={{ marginTop: '0.5rem', whiteSpace: 'pre-wrap' }}>{e.content}</p>
+            <p style={{ fontStyle: 'italic', color: '#4b5563' }}>{e.reflection}</p>
+          </div>
+        ))}
+        {entries.length === 0 && <p>No past entries yet. Your journey starts today.</p>}
+        <button onClick={exportEntries} style={{ marginTop: '1rem', background: '#10b981', color: '#fff', padding: '0.5rem 1rem', border: 'none', borderRadius: '0.375rem' }}>📤 Export Entries</button>
+      </div>
     </motion.div>
   );
 }
